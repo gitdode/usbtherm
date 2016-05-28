@@ -2,7 +2,7 @@
 # https://github.com/hexagon5un/AVR-Programming
 
 MCU = atmega328p
-F_CPU = 12000000
+F_CPU = 1000000
 # Also try BAUD = 19200 or 38400 if you're feeling lucky.
 BAUD = 9600
 
@@ -12,7 +12,8 @@ MAIN = usbtherm.c
 # en: 0 (default), de: 1
 LANG = 1
 
-LOCAL_SOURCE = usbdrv/oddebug.c usbdrv/usbdrv.c usbdrv/usbdrvasm.S
+# LOCAL_SOURCE = usbdrv/oddebug.c usbdrv/usbdrv.c usbdrv/usbdrvasm.S
+LOCAL_SOURCE = usart.c
 
 EXTRA_SOURCE_DIR = 
 EXTRA_SOURCE_FILES = 
@@ -23,9 +24,9 @@ EXTRA_SOURCE_FILES =
 ##########        (Can override.  See bottom of file.)          ##########
 ##########------------------------------------------------------##########
 
-PROGRAMMER_TYPE = avrisp
+PROGRAMMER_TYPE = avrispmkII
 # extra arguments to avrdude: baud rate, chip type, -F flag, etc.
-PROGRAMMER_ARGS = -b 19200 -P /dev/ttyACM3
+# PROGRAMMER_ARGS = -b 19200 -P /dev/ttyACM0
 
 ##########------------------------------------------------------##########
 ##########                   Makefile Magic!                    ##########
