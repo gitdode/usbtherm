@@ -40,8 +40,6 @@ struct usbtherm {
 	enum usbtherm_type type;
 };
 
-/* static char *some_data __initdata = "Some data"; */
-
 static struct usb_driver usbtherm_driver;
 
 /*
@@ -122,7 +120,7 @@ static ssize_t device_write(struct file *filp,
 		size_t len,
 		loff_t *offset)
 {
-	printk(KERN_WARNING "usbtherm: Writing to device is not yet supported!\n");
+	printk(KERN_WARNING "usbtherm: Writing to device is not supported!\n");
 
 	return -EINVAL;
 }
@@ -136,7 +134,7 @@ static struct file_operations fops = {
 };
 
 static struct usb_class_driver usbtherm_class = {
-	.name = "usbtherm%d",
+	.name = DRV_NAME "%d",
 	.fops = &fops,
 	.minor_base = 0,
 };
@@ -161,7 +159,7 @@ static int usbtherm_probe(struct usb_interface *interface,
 
 	err = usb_register_dev(interface, &usbtherm_class);
 
-	printk(KERN_INFO "usbtherm: USB device now connected\n");
+	printk(KERN_INFO "usbtherm: USB device connected\n");
 
 	return SUCCESS;
 
@@ -177,12 +175,11 @@ static void usbtherm_disconnect(struct usb_interface *interface)
 
 	usb_set_intfdata(interface, NULL);
 	usb_put_dev(dev->usbdev);
-
 	usb_deregister_dev(interface, &usbtherm_class);
 
 	kfree(dev);
 
-	printk(KERN_INFO "usbtherm: USB device was disconnected\n");
+	printk(KERN_INFO "usbtherm: USB device disconnected\n");
 }
 
 static struct usb_driver usbtherm_driver = {
