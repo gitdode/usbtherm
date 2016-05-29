@@ -2,7 +2,12 @@
  * usbtherm.c
  *
  *  Created on: 27.05.2016
- *      Author: dode
+ *      Author: Torsten Römer, dode@luniks.net
+ *
+ *	Learned from, inspired by and thanks to:
+ *		- http://tldp.org/LDP/lkmpg/2.6/html/lkmpg.html
+ *		- drivers/usb/misc/usbled.c
+ *		- https://github.com/mavam/ml-driver/blob/master/ml_driver.c
  */
 
 #include <linux/kernel.h>
@@ -37,28 +42,52 @@ struct usbtherm {
 
 /* static char *some_data __initdata = "Some data"; */
 
-static struct class *class = NULL;
-static struct cdev cdev;
-static dev_t dev = 0;
+static struct usb_driver usbtherm_driver;
 
 /*
  * Called when a process tries to open the device file, like
  * "cat /dev/usbtherm0".
- * TODO handle multiple devices or limit to just one (-EBUSY)?
  */
-static int device_open(struct inode *inode, struct file *file)
+static int device_open(struct inode *inode, struct file *filp)
 {
-	printk(KERN_INFO "usbtherm: Device was opened\n");
+	int err = 0;
+	int minor = 0;
+	struct usb_interface *interface = NULL;
+	struct usbtherm *dev = NULL;
+
+	minor = iminor(inode);
+
+	interface = usb_find_interface(&usbtherm_driver, minor);
+	if (! interface)
+	{
+		err = -ENODEV;
+		printk(KERN_WARNING "usbtherm: Could not find USB interface!\n");
+		goto error;
+	}
+
+	dev = usb_get_intfdata(interface);
+	if (! dev) {
+		err = -ENODEV;
+		printk(KERN_WARNING "usbtherm: Could not get USB device!\n");
+		goto error;
+	}
+
+	filp->private_data = dev;
+
+	printk(KERN_INFO "usbtherm: Device was opened!\n");
 
 	try_module_get(THIS_MODULE);
 
 	return SUCCESS;
+
+error:
+ 	 return err;
 }
 
 /*
  * Called when a process closes the device file.
  */
-static int device_release(struct inode *inode, struct file *file)
+static int device_release(struct inode *inode, struct file *filp)
 {
 	printk(KERN_INFO "usbtherm: Device was released\n");
 
@@ -75,7 +104,12 @@ static ssize_t device_read(struct file *filp,
 		size_t length,
 		loff_t * offset)
 {
-	printk(KERN_INFO "usbtherm: Thank you for reading from device!\n");
+	struct usbtherm *dev = NULL;
+
+	dev = filp->private_data;
+
+	printk(KERN_INFO "usbtherm: Reading from USB device %04x\n",
+			dev->usbdev->descriptor.idVendor);
 
 	return SUCCESS;
 }
@@ -101,15 +135,11 @@ static struct file_operations fops = {
 	.release = 	device_release
 };
 
-/*
- * Could be used instead of alloc_chrdev_region, cdev_init, cdev_add and
- * device_create?
 static struct usb_class_driver usbtherm_class = {
 	.name = "usbtherm%d",
 	.fops = &fops,
 	.minor_base = 0,
 };
-*/
 
 static int usbtherm_probe(struct usb_interface *interface,
 		const struct usb_device_id *id)
@@ -129,6 +159,8 @@ static int usbtherm_probe(struct usb_interface *interface,
 
 	usb_set_intfdata(interface, dev);
 
+	err = usb_register_dev(interface, &usbtherm_class);
+
 	printk(KERN_INFO "usbtherm: USB device now connected\n");
 
 	return SUCCESS;
@@ -146,6 +178,8 @@ static void usbtherm_disconnect(struct usb_interface *interface)
 	usb_set_intfdata(interface, NULL);
 	usb_put_dev(dev->usbdev);
 
+	usb_deregister_dev(interface, &usbtherm_class);
+
 	kfree(dev);
 
 	printk(KERN_INFO "usbtherm: USB device was disconnected\n");
@@ -158,95 +192,7 @@ static struct usb_driver usbtherm_driver = {
     .disconnect = 	usbtherm_disconnect,
 };
 
-/**
- * Destroys the device and class if the class was created, and unregisters
- * the device.
- */
-static void cleanup(void) {
-	if (class)
-	{
-		device_destroy(class, dev);
-		cdev_del(&cdev);
-		class_destroy(class);
-	}
-
-	usb_deregister(&usbtherm_driver);
-	unregister_chrdev_region(dev, 1);
-}
-
-/**
- * Allocates a char device, creates a class and adds and creates the device.
- */
-static int __init usbtherm_init(void)
-{
-	int err = 0;
-	int major = 0;
-	struct device *device = NULL;
-
-	err = alloc_chrdev_region(&dev, 0, 1, DRV_NAME);
-	if (err < 0)
-	{
-		printk(KERN_WARNING "usbtherm: Allocating chrdev failed");
-
-		return err;
-	}
-	major = MAJOR(dev);
-	printk(KERN_INFO "usbtherm: Got chrdev major: %d\n", major);
-
-	class = class_create(THIS_MODULE, DRV_NAME);
-	if (IS_ERR(class))
-	{
-		err = PTR_ERR(class);
-		printk(KERN_WARNING "usbtherm: Creating class failed");
-		unregister_chrdev_region(dev, 1);
-
-		return err;
-	}
-
-	cdev_init(&cdev, &fops);
-	err = cdev_add(&cdev, dev, 1);
-	if (err < 0)
-	{
-		printk(KERN_WARNING "usbtherm: Adding device %s%d failed",
-				DRV_NAME, 0);
-		goto error;
-	}
-
-	device = device_create(class, NULL, dev, NULL, DRV_NAME "%d", 0);
-	if (IS_ERR(device))
-	{
-		err = PTR_ERR(device);
-		printk(KERN_WARNING "usbtherm: Creating device %s%d failed",
-				DRV_NAME, 0);
-		goto error;
-	}
-
-	err = usb_register(&usbtherm_driver);
-	if (err < 0)
-	{
-		printk(KERN_WARNING "usbtherm: Registering USB driver failed");
-		goto error;
-	}
-
-	return SUCCESS;
-
-error:
-	cleanup();
-	return err;
-}
-
-/**
- * Cleans up.
- */
-static void __exit usbtherm_exit(void)
-{
-	cleanup();
-
-	printk(KERN_INFO "usbtherm: Goodbye!\n");
-}
-
-module_init(usbtherm_init);
-module_exit(usbtherm_exit);
+module_usb_driver(usbtherm_driver);
 
 MODULE_AUTHOR("Torsten Römer <dode@luniks.net>");
 MODULE_LICENSE("GPL");
