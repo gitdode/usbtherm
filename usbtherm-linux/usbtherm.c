@@ -1,13 +1,17 @@
 /*
  * usbtherm.c
  *
- *  Created on: 27.05.2016
- *      Author: Torsten Römer, dode@luniks.net
+ * Created on: 27.05.2016
+ *     Author: Torsten Römer, dode@luniks.net
  *
- *	Learned from, inspired by and thanks to:
- *		- http://tldp.org/LDP/lkmpg/2.6/html/lkmpg.html
- *		- drivers/usb/misc/usbled.c
- *		- https://github.com/mavam/ml-driver/blob/master/ml_driver.c
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, version 2.
+ *
+ * Learned from, inspired by and thanks to:
+ *	   - http://tldp.org/LDP/lkmpg/2.6/html/lkmpg.html
+ *	   - drivers/usb/misc/usbled.c
+ *	   - https://github.com/mavam/ml-driver/blob/master/ml_driver.c
  */
 
 #include <linux/kernel.h>
@@ -22,15 +26,21 @@
 
 #define DRV_NAME	"usbtherm"
 #define SUCCESS		0
+#define MSG_LEN		80
 
 enum usbtherm_type {
 	DODES_USB_THERMOMETER
 };
 
+/**
+ * List of USB device vendor and product id's that this driver feels
+ * responsible for. The module is loaded when one of the devices listed
+ * is connected.
+ */
 static const struct usb_device_id usbtherm_usb_tbl[] = {
 	/* Custom USBTherm device */
 	{USB_DEVICE(0x0df7, 0x0700), .driver_info = DODES_USB_THERMOMETER},
-	{}
+	{} /* terminator */
 };
 
 MODULE_DEVICE_TABLE(usb, usbtherm_usb_tbl);
@@ -41,6 +51,7 @@ struct usbtherm {
 };
 
 static struct usb_driver usbtherm_driver;
+static char message[MSG_LEN];
 
 /*
  * Called when a process tries to open the device file, like
@@ -64,63 +75,87 @@ static int device_open(struct inode *inode, struct file *filp)
 	}
 
 	dev = usb_get_intfdata(interface);
-	if (! dev) {
+	if (! dev)
+	{
 		err = -ENODEV;
 		printk(KERN_WARNING "usbtherm: Could not get USB device!\n");
 		goto error;
 	}
 
-	filp->private_data = dev;
 
-	printk(KERN_INFO "usbtherm: Device was opened!\n");
+	/*
+	 * If dev is needed in for example device_read.
+	 */
+	/* filp->private_data = dev; */
 
-	try_module_get(THIS_MODULE);
+	/* TODO read actual temperature value from USB device */
+	snprintf(message, MSG_LEN, "%s\n", "22.5");
+
+	printk(KERN_INFO "usbtherm: Device was opened\n");
 
 	return SUCCESS;
 
 error:
- 	 return err;
+	return err;
 }
 
-/*
+/**
  * Called when a process closes the device file.
  */
 static int device_release(struct inode *inode, struct file *filp)
 {
 	printk(KERN_INFO "usbtherm: Device was released\n");
 
-	module_put(THIS_MODULE);
-
 	return SUCCESS;
 }
 
 /**
- * Called when a process reads from the device file.
+ * Called when a process reads from the device file, i.e. "cat /dev/usbtherm0".
  */
 static ssize_t device_read(struct file *filp,
 		char *buffer,
 		size_t length,
-		loff_t * offset)
+		loff_t *offset)
 {
-	struct usbtherm *dev = NULL;
+	int err = 0;
+	int strlen_message = 0;
+	size_t len_read = 0;
 
-	dev = filp->private_data;
+	printk(KERN_INFO "usbtherm: Reading from device\n");
 
-	printk(KERN_INFO "usbtherm: Reading from USB device %04x\n",
-			dev->usbdev->descriptor.idVendor);
+	strlen_message = strlen(message);
+	if (strlen_message <= *offset)
+	{
+		return 0;
+	}
 
-	return SUCCESS;
+	len_read = strlen_message > length ? length : strlen_message;
+
+	err = copy_to_user(buffer, message + *offset, len_read);
+	if (err)
+	{
+		err = -EFAULT;
+		goto error;
+	}
+
+	*offset += len_read;
+
+	return len_read;
+
+error:
+	return err;
 }
 
-/*
- * Called when a process writes to the device file: echo "hi" > /dev/usbtherm0
+/**
+ * Called when a process writes to the device file, i.e.
+ * echo "hello" > /dev/usbtherm0
  */
 static ssize_t device_write(struct file *filp,
 		const char *buff,
 		size_t len,
 		loff_t *offset)
 {
-	printk(KERN_WARNING "usbtherm: Writing to device is not supported!\n");
+	printk(KERN_WARNING "usbtherm: Writing to USBTherm is not supported!\n");
 
 	return -EINVAL;
 }
@@ -139,6 +174,9 @@ static struct usb_class_driver usbtherm_class = {
 	.minor_base = 0,
 };
 
+/**
+ * Called when the USB device was connected.
+ */
 static int usbtherm_probe(struct usb_interface *interface,
 		const struct usb_device_id *id)
 {
@@ -157,9 +195,12 @@ static int usbtherm_probe(struct usb_interface *interface,
 
 	usb_set_intfdata(interface, dev);
 
+	/*
+	 * Creates the device file in /dev and the class in /sys/class/usbmisc
+	 */
 	err = usb_register_dev(interface, &usbtherm_class);
 
-	printk(KERN_INFO "usbtherm: USB device connected\n");
+	printk(KERN_INFO "usbtherm: USB device was connected\n");
 
 	return SUCCESS;
 
@@ -167,6 +208,9 @@ nomem:
 	return err;
 }
 
+/**
+ * Called when the USB device is disconnected.
+ */
 static void usbtherm_disconnect(struct usb_interface *interface)
 {
 	struct usbtherm *dev;
@@ -175,13 +219,20 @@ static void usbtherm_disconnect(struct usb_interface *interface)
 
 	usb_set_intfdata(interface, NULL);
 	usb_put_dev(dev->usbdev);
+
+	/*
+	 * Cleans up the device file in /dev and the class in /sys/class/usbmisc
+	 */
 	usb_deregister_dev(interface, &usbtherm_class);
 
 	kfree(dev);
 
-	printk(KERN_INFO "usbtherm: USB device disconnected\n");
+	printk(KERN_INFO "usbtherm: USB device was disconnected\n");
 }
 
+/**
+ * Initialize the usb_driver structure.
+ */
 static struct usb_driver usbtherm_driver = {
     .name = 		DRV_NAME,
     .id_table =		usbtherm_usb_tbl,
@@ -189,6 +240,9 @@ static struct usb_driver usbtherm_driver = {
     .disconnect = 	usbtherm_disconnect,
 };
 
+/**
+ * Replaces module_init() and module_exit().
+ */
 module_usb_driver(usbtherm_driver);
 
 MODULE_AUTHOR("Torsten Römer <dode@luniks.net>");
