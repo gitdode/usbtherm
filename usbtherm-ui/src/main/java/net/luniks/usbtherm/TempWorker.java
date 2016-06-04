@@ -19,6 +19,8 @@ import javax.swing.SwingWorker;
  */
 public class TempWorker extends SwingWorker<Float, Void> {
 	
+	private static final String TEMP_FORMAT = "%3.1f °C";
+	
 	private static final Logger logger = Logger.getAnonymousLogger();
 	
 	private final TempReader tempReader;
@@ -42,7 +44,7 @@ public class TempWorker extends SwingWorker<Float, Void> {
 	@Override
 	protected void done() {
 		try {
-			final String text = String.format("%3.1f °C", get());
+			final String text = String.format(TEMP_FORMAT, get());
 			tempLabel.setText(text);
 		} catch (final InterruptedException | ExecutionException e) {
 			tempLabel.setText("Error");
