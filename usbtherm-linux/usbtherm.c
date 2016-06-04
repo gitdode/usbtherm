@@ -8,7 +8,7 @@
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, version 2.
  *
- * Learned from, inspired by and thanks to:
+ * Learned from and thanks to:
  *	   - http://tldp.org/LDP/lkmpg/2.6/html/lkmpg.html
  *	   - drivers/usb/misc/usbled.c
  *	   - https://github.com/mavam/ml-driver/blob/master/ml_driver.c
@@ -64,6 +64,8 @@ static int device_open(struct inode *inode, struct file *filp)
 	struct usb_interface *interface = NULL;
 	struct usbtherm *dev = NULL;
 
+	struct usb_device_descriptor usb_dev_desc;
+
 	minor = iminor(inode);
 
 	interface = usb_find_interface(&usbtherm_driver, minor);
@@ -82,14 +84,20 @@ static int device_open(struct inode *inode, struct file *filp)
 		goto error;
 	}
 
-
 	/*
 	 * If dev is needed in for example device_read.
 	 */
 	/* filp->private_data = dev; */
 
 	/* TODO read actual temperature value from USB device */
-	snprintf(message, MSG_LEN, "%s\n", "22.5");
+	err = usb_get_descriptor(dev->usbdev, USB_DT_DEVICE, 0x00,
+			&usb_dev_desc, sizeof(usb_dev_desc));
+	if (err < 0)
+	{
+		goto error;
+	}
+
+	snprintf(message, MSG_LEN, "%04x\n", usb_dev_desc.idProduct);
 
 	printk(KERN_INFO "usbtherm: Device was opened\n");
 
@@ -168,10 +176,22 @@ static struct file_operations fops = {
 	.release = 	device_release
 };
 
+static char *usbtherm_devnode(struct device *dev, umode_t *mode)
+{
+	if (! mode)
+	{
+		return NULL;
+	}
+	*mode = 0644;
+
+	return NULL;
+}
+
 static struct usb_class_driver usbtherm_class = {
 	.name = DRV_NAME "%d",
+	.devnode = usbtherm_devnode,
 	.fops = &fops,
-	.minor_base = 0,
+	.minor_base = 0
 };
 
 /**
