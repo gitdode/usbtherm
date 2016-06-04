@@ -47,13 +47,13 @@ public class USBTherm {
 	}
 
 	/**
-	 * Enables antialiasing for nicer font display and builds the UI.
+	 * "Forces" antialiasing (KDE?) for nicer font display and builds the UI.
 	 * 
 	 * @param args
 	 */
 	public static void main(final String[] args) {
+		// http://docs.oracle.com/javase/7/docs/technotes/guides/2d/flags.html#aaFonts
 		System.setProperty("awt.useSystemAAFontSettings","on");
-		System.setProperty("swing.aatext", "true");
 				
 		final USBTherm usbtherm = new USBTherm(args);
 		SwingUtilities.invokeLater(usbtherm::buildUI);
