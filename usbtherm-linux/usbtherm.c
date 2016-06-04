@@ -126,18 +126,18 @@ static ssize_t device_read(struct file *filp,
 		loff_t *offset)
 {
 	int err = 0;
-	int strlen_message = 0;
+	size_t len_rem = 0;
 	size_t len_read = 0;
 
 	printk(KERN_INFO "usbtherm: Reading from device\n");
 
-	strlen_message = strlen(message);
-	if (strlen_message <= *offset)
+	len_rem = strlen(message) - *offset;
+	if (len_rem <= *offset)
 	{
 		return 0;
 	}
 
-	len_read = strlen_message > length ? length : strlen_message;
+	len_read = len_rem > length ? length : len_rem;
 
 	err = copy_to_user(buffer, message + *offset, len_read);
 	if (err)
@@ -176,6 +176,10 @@ static struct file_operations fops = {
 	.release = 	device_release
 };
 
+/**
+ * Have the device file created with write permission for root only for now and
+ * read permission for everyone.
+ */
 static char *usbtherm_devnode(struct device *dev, umode_t *mode)
 {
 	if (! mode)
@@ -205,7 +209,8 @@ static int usbtherm_probe(struct usb_interface *interface,
 	struct usbtherm *dev = NULL;
 
 	dev = kzalloc(sizeof(struct usbtherm), GFP_KERNEL);
-	if (dev == NULL) {
+	if (dev == NULL)
+	{
 		err = -ENOMEM;
 		goto nomem;
 	}
