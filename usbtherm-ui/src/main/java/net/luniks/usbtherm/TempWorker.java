@@ -1,4 +1,9 @@
 package net.luniks.usbtherm;
+/**
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, version 2.
+ */
 
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
@@ -24,11 +29,11 @@ public class TempWorker extends SwingWorker<Float, Void> {
 	 * label.
 	 * 
 	 * @param reader reader reading the temperature value
-	 * @param thermLabel label being updated with the temperature value
+	 * @param label label being updated with the temperature value
 	 */
-	public TempWorker(final TempReader reader, final JLabel thermLabel) {
+	public TempWorker(final TempReader reader, final JLabel label) {
 		this.tempReader = reader;
-		this.tempLabel = thermLabel;
+		this.tempLabel = label;
 	}
 		
 	/**
