@@ -19,25 +19,31 @@
 #include <avr/wdt.h>
 #include <util/delay.h>
 
-/* #include "usbdrv/usbdrv.h" */
+#include <avr/pgmspace.h>
+
+#include "usbdrv/usbdrv.h"
 /* #include "usbdrv/oddebug.h" */
 
 #include "usart.h"
 
-#define SUCCESS 		0
-#define PIN_TEMP 		PC0
+/* The pins for V-USB are set up in usbdrv/usbconfig.h */
+#define DDR_LED			DDRB
+#define	PORT_LED		PORTB
 #define PIN_LED			PB1
+#define PIN_TEMP 		PC0
 #define AREF_MV			5000
+
+/* Weight of the exponential weighted moving average as bit shift */
+#define EWMA_BS			2
+
+/* Output of the TMP36 is 750 mV @ 25°C */
 #define TMP36_MV_0C		500
 #define TMP36_MV_20C	700
 
-/*
-usbMsgLen_t usbFunctionSetup(uchar data[8]) {
-	usbRequest_t *request = (void *)data;
+/* Timer0 interrupts per second */
+#define INTS_SEC 		F_CPU / (1024UL * 255)
 
-    return SUCCESS;
-}
-*/
+#define CUSTOM_REQ_TEMP	0
 
 static volatile uint8_t ints = 0;
 static int32_t mVAvg = TMP36_MV_20C << 2; // 20°C x4
@@ -52,8 +58,8 @@ EMPTY_INTERRUPT(ADC_vect);
  * Sets up the pins.
  */
 static void initPins(void) {
-	// set pin PB1 as output pin
-	DDRB |= (1 << PIN_LED);
+	// set LED pin as output pin
+	DDR_LED |= (1 << PIN_LED);
 }
 
 /**
@@ -62,7 +68,7 @@ static void initPins(void) {
 static void initTimer(void) {
 	// timer0 clear timer on compare match mode, TOP OCR0A
 	TCCR0A |= (1 << WGM01);
-	// timer0 clock prescaler/?/255 = ? KHz @ 1 MHz
+	// timer0 clock prescaler/1024/255 ~ 46 Hz @ 12 MHz ~ 61 Hz @ 16 MHz
 	TCCR0B |= (1 << CS02) | (1 << CS00);
 	OCR0A = 255;
 
@@ -80,14 +86,25 @@ static void initADC(void) {
 	ADMUX |= (1 << REFS0);
 	// disable digital input on the ADC inputs to reduce digital noise
 	DIDR0 = 0b00111111;
-	// ADC clock prescaler/8 = 125 kHz @ 1 MHz
-	ADCSRA |= (1 << ADPS1) | (1 << ADPS0);
+	// ADC clock prescaler/64 ~ 187.5 kHz @ 12 MHz ~ 250 kHz @ 16 MHz
+	ADCSRA |= (1 << ADPS2) | (1 << ADPS1);
 	// enable ADC interrupt
 	ADCSRA |= (1 << ADIE);
 	// enable ADC
 	ADCSRA |= (1 << ADEN);
 	// measure at pin PIN_TEMP
 	ADMUX = (0b11110000 & ADMUX) | PIN_TEMP;
+}
+
+/**
+ * Sets up V-USB.
+ */
+static void initUSB(void) {
+	wdt_disable();
+	usbInit();
+	usbDeviceDisconnect();
+	_delay_ms(255);
+	usbDeviceConnect();
 }
 
 /**
@@ -105,18 +122,53 @@ static void measureTemp(void) {
 
 	int16_t mV = (((overValue >> 2) * AREF_MV) >> 12);
 
-	// calculate EWMA x4
-	mVAvg = mV + mVAvg - ((mVAvg - 2) >> 2);
+	// calculate EWMA
+	mVAvg = mV + mVAvg - ((mVAvg - EWMA_BS) >> EWMA_BS);
 }
 
 /**
  * Translates the averaged voltage to degrees celsius and prints the result.
  */
 static void printTemp(void) {
-	div_t temp = div((mVAvg >> 2) - TMP36_MV_0C, 10);
-	char buf[20];
-	snprintf(buf, sizeof(buf), "Temp is %d.%d °C\n", temp.quot, abs(temp.rem));
+	div_t temp = div((mVAvg >> EWMA_BS) - TMP36_MV_0C, 10);
+	char buf[16];
+	snprintf(buf, sizeof(buf), "%d.%d °C\n", temp.quot, abs(temp.rem));
 	printString(buf);
+}
+
+/**
+ * Called by the driver to read the temperature value in °C x10.
+ */
+uchar usbFunctionRead(uchar *data, uchar len) {
+
+	/**
+	 * The temperature value is small enough to be read at once.
+	 * TODO okay like that?
+	 */
+	int16_t tempx10 = (mVAvg >> EWMA_BS) - TMP36_MV_0C;
+	snprintf((char *)data, len, "%d", tempx10);
+
+    return len;
+}
+
+/**
+ * Sets up the implemented requests.
+ */
+usbMsgLen_t usbFunctionSetup(uchar data[8]) {
+	usbRequest_t *req = (void *)data;
+
+	/*
+	 * The only implemented request - tells the driver to read data
+	 * (the temperature value) with usbFunctionRead()
+	 */
+	if (req->bRequest == 0) {
+		return USB_NO_MSG;
+	}
+
+	/**
+	 * Return no data for unimplemented requests.
+	 */
+	return 0;
 }
 
 int main(void) {
@@ -127,21 +179,29 @@ int main(void) {
 	initPins();
 	initTimer();
 	initADC();
+	initUSB();
 
 	// enable global interrupts
 	sei();
 
 	while (true) {
-		if (ints >= 4) {
+
+		/**
+		 * About every second, turn on the LED, measure the temperature,
+		 * print the temperature via USART, turn off the LED.
+		 */
+		if (ints >= INTS_SEC) {
 			// set LED pin high
-			PORTB |= (1 << PIN_LED);
+			PORT_LED |= (1 << PIN_LED);
 			ints = 0;
 			measureTemp();
 			printTemp();
 			// set LED pin low
-			PORTB &= ~(1 << PIN_LED);
+			PORT_LED &= ~(1 << PIN_LED);
+
 		}
+		usbPoll();
 	}
 
-	return SUCCESS;
+	return 0;
 }

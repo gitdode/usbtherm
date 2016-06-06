@@ -3,13 +3,13 @@
 # Simplified version from: https://github.com/hexagon5un/AVR-Programming
 
 MCU = atmega328p
-F_CPU = 1000000
+F_CPU = 12000000
 BAUD = 9600
 PROGRAMMER_TYPE = avrispmkII
 PROGRAMMER_ARGS = 
 
 MAIN = usbtherm.c
-SRC = usart.c
+SRC = usart.c usbdrv/usbdrv.c usbdrv/usbdrvasm.S
 
 CC = avr-gcc
 OBJCOPY = avr-objcopy
