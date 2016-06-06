@@ -53,10 +53,10 @@ public class TempWorker extends SwingWorker<Float, Void> {
 	}
 
 	/**
-	 * Reads the temperature and returns it.
+	 * Reads the temperature value, divides it by 10 and returns it.
 	 */
 	@Override
 	protected Float doInBackground() throws Exception {
-		return Float.valueOf(tempReader.read());
+		return Float.valueOf(tempReader.read()) / 10;
 	}
 }
