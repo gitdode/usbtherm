@@ -39,7 +39,7 @@ enum usbtherm_type {
  */
 static const struct usb_device_id usbtherm_usb_tbl[] = {
 	/* Custom USBTherm device */
-	{USB_DEVICE(0x0df7, 0x0700), .driver_info = DODES_USB_THERMOMETER},
+	{USB_DEVICE(0xd0de, 0x0001), .driver_info = DODES_USB_THERMOMETER},
 	{} /* terminator */
 };
 
@@ -64,7 +64,8 @@ static int device_open(struct inode *inode, struct file *filp)
 	struct usb_interface *interface = NULL;
 	struct usbtherm *dev = NULL;
 
-	struct usb_device_descriptor usb_dev_desc;
+	char data[8];
+	/* struct usb_device_descriptor usb_dev_desc; */
 
 	minor = iminor(inode);
 
@@ -89,17 +90,19 @@ static int device_open(struct inode *inode, struct file *filp)
 	 */
 	/* filp->private_data = dev; */
 
-	/* TODO read actual temperature value from USB device */
-	err = usb_get_descriptor(dev->usbdev, USB_DT_DEVICE, 0x00,
-			&usb_dev_desc, sizeof(usb_dev_desc));
+	err = usb_control_msg(dev->usbdev, usb_rcvctrlpipe(dev->usbdev, USB_DIR_OUT),
+			USB_REQ_GET_STATUS, USB_DIR_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+			0, 0, data, sizeof(data), 1000);
+
 	if (err < 0)
 	{
+		err = -EIO;
 		goto error;
 	}
 
-	snprintf(message, MSG_LEN, "%04x\n", usb_dev_desc.idProduct);
+	snprintf(message, MSG_LEN, "%s\n", data);
 
-	printk(KERN_INFO "usbtherm: Device was opened\n");
+	printk(KERN_INFO "usbtherm: Device was opened");
 
 	return SUCCESS;
 
