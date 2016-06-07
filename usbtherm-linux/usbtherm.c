@@ -24,9 +24,10 @@
 #include <linux/usb.h>
 #include <linux/cdev.h>
 
-#define DRV_NAME	"usbtherm"
-#define SUCCESS		0
-#define MSG_LEN		80
+#define DRV_NAME		"usbtherm"
+#define SUCCESS			0
+#define MSG_LEN			80
+#define CUSTOM_REQ_TEMP	0
 
 enum usbtherm_type {
 	DODES_USB_THERMOMETER
@@ -63,9 +64,7 @@ static int device_open(struct inode *inode, struct file *filp)
 	int minor = 0;
 	struct usb_interface *interface = NULL;
 	struct usbtherm *dev = NULL;
-
 	char data[8];
-	/* struct usb_device_descriptor usb_dev_desc; */
 
 	minor = iminor(inode);
 
@@ -90,8 +89,12 @@ static int device_open(struct inode *inode, struct file *filp)
 	 */
 	/* filp->private_data = dev; */
 
+	/*
+	 * Send a custom "vendor" type status request to read
+	 * the temperature value from the device.
+	 */
 	err = usb_control_msg(dev->usbdev, usb_rcvctrlpipe(dev->usbdev, USB_DIR_OUT),
-			USB_REQ_GET_STATUS, USB_DIR_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+			CUSTOM_REQ_TEMP, USB_DIR_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
 			0, 0, data, sizeof(data), 1000);
 
 	if (err < 0)

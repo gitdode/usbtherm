@@ -25,8 +25,10 @@ import javax.swing.SwingUtilities;
  */
 public class USBTherm {
 	
-	private static final String DEVICE = "/dev/usbtherm0";
-	private static final int UPDATE_SECS = 1;
+	static final String DEVICE = 		"/dev/usbtherm0";
+	static final int 	UPDATE_SECS = 	1;
+	static final String	TEMP_FORMAT = 	"%3.1f °C";
+	static final String	ERROR_MSG = 	"Huh?";
 	
 	private final JLabel tempLabel = new JLabel();
 	private final ScheduledExecutorService executor = 
@@ -72,6 +74,7 @@ public class USBTherm {
 		frame.add(tempLabel);
 		
 		frame.pack();
+		frame.setMinimumSize(frame.getSize());
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 		

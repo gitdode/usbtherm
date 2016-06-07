@@ -43,10 +43,11 @@
 /* Timer0 interrupts per second */
 #define INTS_SEC 		F_CPU / (1024UL * 255)
 
+/* Request from the kernel driver */
 #define CUSTOM_REQ_TEMP	0
 
 static volatile uint8_t ints = 0;
-static int32_t mVAvg = TMP36_MV_20C << 2; // 20°C x4
+static int32_t mVAvg = TMP36_MV_20C << EWMA_BS;
 
 ISR(TIMER0_COMPA_vect) {
 	ints++;
@@ -127,7 +128,7 @@ static void measureTemp(void) {
 }
 
 /**
- * Translates the averaged voltage to degrees celsius and prints the result.
+ * Translates the averaged voltage to degrees Celsius and prints the result.
  */
 static void printTemp(void) {
 	div_t temp = div((mVAvg >> EWMA_BS) - TMP36_MV_0C, 10);
@@ -161,7 +162,7 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
 	 * The only implemented request - tells the driver to read data
 	 * (the temperature value) with usbFunctionRead()
 	 */
-	if (req->bRequest == 0) {
+	if (req->bRequest == CUSTOM_REQ_TEMP) {
 		return USB_NO_MSG;
 	}
 
@@ -191,9 +192,9 @@ int main(void) {
 		 * print the temperature via USART, turn off the LED.
 		 */
 		if (ints >= INTS_SEC) {
+			ints = 0;
 			// set LED pin high
 			PORT_LED |= (1 << PIN_LED);
-			ints = 0;
 			measureTemp();
 			printTemp();
 			// set LED pin low
