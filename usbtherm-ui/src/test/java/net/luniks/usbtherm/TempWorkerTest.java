@@ -32,13 +32,13 @@ public class TempWorkerTest {
 		final TempWorker worker = new TempWorker(reader, label);
 		worker.execute();
 		
-		Mockito.verify(label, Mockito.timeout(1000)).setText("Error");
+		Mockito.verify(label, Mockito.timeout(1000)).setText("Huh?");
 		Mockito.verify(reader).read();
 	}
 	
 	@Test
 	public void testHappyPath() throws IOException {
-		Mockito.when(reader.read()).thenReturn("20.0");
+		Mockito.when(reader.read()).thenReturn("200");
 		final String formatted = String.format("%3.1f °C", 20f);
 		
 		final TempWorker worker = new TempWorker(reader, label);
