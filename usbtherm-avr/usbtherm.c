@@ -12,6 +12,7 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
@@ -24,6 +25,11 @@
 #include "usbdrv/usbdrv.h"
 /* #include "usbdrv/oddebug.h" */
 
+/*
+ * Simple module providing functions to print and read a string via USART.
+ * Maybe not working for all AVR controllers.
+ * The V-USB module "usbdrv/oddebug.h" provides more advanced debug logging.
+ */
 #include "usart.h"
 
 /* The pins for V-USB are set up in usbdrv/usbconfig.h */
@@ -143,7 +149,7 @@ static void printTemp(void) {
 uchar usbFunctionRead(uchar *data, uchar len) {
 
 	/**
-	 * The temperature value is small enough to be read at once.
+	 * The temperature value is short enough to be read at once.
 	 * TODO okay like that?
 	 */
 	int16_t tempx10 = (mVAvg >> EWMA_BS) - TMP36_MV_0C;
