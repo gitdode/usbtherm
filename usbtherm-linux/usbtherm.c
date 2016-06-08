@@ -19,10 +19,10 @@
 #include <linux/slab.h>
 #include <linux/usb.h>
 
-#define DRV_NAME		"usbtherm"
-#define SUCCESS			0
-#define MSG_LEN			80
-#define CUSTOM_REQ_TEMP	0
+#define DRV_NAME			"usbtherm"
+#define SUCCESS				0
+#define MSG_LEN				80
+#define CUSTOM_REQ_TEMP		0
 
 enum usbtherm_type {
 	DODES_USB_THERMOMETER
@@ -88,7 +88,8 @@ static int device_open(struct inode *inode, struct file *filp)
 	 * Send a custom "vendor" type status request to read
 	 * the temperature value from the device.
 	 */
-	err = usb_control_msg(dev->usbdev, usb_rcvctrlpipe(dev->usbdev, USB_DIR_OUT),
+	err = usb_control_msg(dev->usbdev,
+			usb_rcvctrlpipe(dev->usbdev, USB_DIR_OUT),
 			CUSTOM_REQ_TEMP, USB_DIR_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
 			0, 0, data, sizeof(data), 1000);
 
@@ -121,9 +122,7 @@ static int device_release(struct inode *inode, struct file *filp)
 /**
  * Called when a process reads from the device file, i.e. "cat /dev/usbtherm0".
  */
-static ssize_t device_read(struct file *filp,
-		char *buffer,
-		size_t length,
+static ssize_t device_read(struct file *filp, char *buffer,	size_t length,
 		loff_t *offset)
 {
 	int err = 0;
@@ -159,9 +158,7 @@ error:
  * Called when a process writes to the device file, i.e.
  * echo "hello" > /dev/usbtherm0
  */
-static ssize_t device_write(struct file *filp,
-		const char *buff,
-		size_t len,
+static ssize_t device_write(struct file *filp, const char *buff, size_t len,
 		loff_t *offset)
 {
 	printk(KERN_WARNING "usbtherm: Writing to USBTherm is not supported!\n");
@@ -178,8 +175,7 @@ static struct file_operations fops = {
 };
 
 /**
- * Have the device file created with write permission for root only for now and
- * read permission for everyone.
+ * Have the device file created with read and write permission for everyone.
  */
 static char *usbtherm_devnode(struct device *dev, umode_t *mode)
 {
@@ -187,7 +183,7 @@ static char *usbtherm_devnode(struct device *dev, umode_t *mode)
 	{
 		return NULL;
 	}
-	*mode = 0644;
+	*mode = 0666;
 
 	return NULL;
 }
