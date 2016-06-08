@@ -213,7 +213,7 @@ static int usbtherm_probe(struct usb_interface *interface,
 	if (dev == NULL)
 	{
 		err = -ENOMEM;
-		goto nomem;
+		goto error;
 	}
 
 	dev->usbdev = usb_get_dev(usbdev);
@@ -225,12 +225,16 @@ static int usbtherm_probe(struct usb_interface *interface,
 	 * Creates the device file in /dev and the class in /sys/class/usbmisc
 	 */
 	err = usb_register_dev(interface, &usbtherm_class);
+	if (err != 0)
+	{
+		printk(KERN_WARNING "usbtherm: Could not register USB device!\n");
+	}
 
 	printk(KERN_INFO "usbtherm: USB device was connected\n");
 
 	return SUCCESS;
 
-nomem:
+error:
 	return err;
 }
 
