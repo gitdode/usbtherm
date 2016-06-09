@@ -101,7 +101,7 @@ static int device_open(struct inode *inode, struct file *filp)
 
 	snprintf(message, MSG_LEN, "%s\n", data);
 
-	printk(KERN_INFO "usbtherm: Device was opened");
+	/* printk(KERN_DEBUG "usbtherm: Device was opened"); */
 
 	return SUCCESS;
 
@@ -114,7 +114,7 @@ error:
  */
 static int device_release(struct inode *inode, struct file *filp)
 {
-	printk(KERN_INFO "usbtherm: Device was released\n");
+	/* printk(KERN_DEBUG "usbtherm: Device was released\n"); */
 
 	return SUCCESS;
 }
@@ -129,7 +129,7 @@ static ssize_t device_read(struct file *filp, char *buffer,	size_t length,
 	size_t len_rem = 0;
 	size_t len_read = 0;
 
-	printk(KERN_INFO "usbtherm: Reading from device\n");
+	/* printk(KERN_DEBUG "usbtherm: Reading from device\n"); */
 
 	len_rem = strlen(message) - *offset;
 	if (len_rem <= *offset)
