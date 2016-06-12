@@ -35,7 +35,7 @@
 /* The pins for V-USB are set up in usbdrv/usbconfig.h */
 #define DDR_LED			DDRB
 #define	PORT_LED		PORTB
-#define PIN_LED			PB1
+#define PIN_LED			PB0
 #define PIN_TEMP 		PC0
 #define AREF_MV			5000
 
