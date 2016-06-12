@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP TMP36
+D Low Voltage Temperature Sensor, TO-92
+K TMP36 Temperature Sensor
+F http://www.analog.com/en/products/analog-to-digital-converters/integrated-special-purpose-converters/integrated-temperature-sensors/tmp36.html
+$ENDCMP
+#
+#End Doc Library
