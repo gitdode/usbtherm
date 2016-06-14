@@ -8,6 +8,9 @@
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, version 2.
  *
+ * Linux USB driver for USBTherm, a simple AVR micro controller based USB
+ * thermometer.
+ *
  * Learned from and thanks to:
  *	   - http://tldp.org/LDP/lkmpg/2.6/html/lkmpg.html
  *	   - drivers/usb/misc/usbled.c

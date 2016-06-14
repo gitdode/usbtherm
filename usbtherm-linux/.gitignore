@@ -1,1 +1,11 @@
 /Debug/
+/usbtherm.mod.c
+/Module.symvers
+/modules.order
+/usbtherm.ko
+/usbtherm.mod.o
+/usbtherm.o
+/.tmp_versions/
+/.usbtherm.ko.cmd
+/.usbtherm.mod.o.cmd
+/.usbtherm.o.cmd
