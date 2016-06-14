@@ -3,8 +3,6 @@ Simple micro controller based USB thermometer with Linux kernel driver module an
 
 <img src="http://luniks.net/usbtherm/screens/USBTherm.png"/>
 
-The purpose of this project is to provide a basic but complete example of a Linux USB kernel driver module and a simple USB device.
-
 This repository contains three projects:
 
 * usbtherm-avr - USB thermometer based on an AVR micro controller and the <a href="https://github.com/obdev/v-usb">V-USB</a> firmware-only USB implementation
