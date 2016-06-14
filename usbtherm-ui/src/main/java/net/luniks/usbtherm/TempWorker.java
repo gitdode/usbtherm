@@ -1,9 +1,10 @@
-package net.luniks.usbtherm;
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, version 2.
  */
+
+package net.luniks.usbtherm;
 
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
