@@ -40,7 +40,7 @@ avrtarget/de.innot.avreclipse.configuration.app.debug.1534752444/avrdude/Program
 avrtarget/de.innot.avreclipse.configuration.app.debug.1534752444/avrdude/UseCounter=false
 avrtarget/de.innot.avreclipse.configuration.app.debug.1534752444/avrdude/WriteEEPROM=false
 avrtarget/de.innot.avreclipse.configuration.app.debug.1534752444/avrdude/WriteFlash=true
-avrtarget/de.innot.avreclipse.configuration.app.release.812063719/ClockFrequency=16000000
+avrtarget/de.innot.avreclipse.configuration.app.release.812063719/ClockFrequency=12000000
 avrtarget/de.innot.avreclipse.configuration.app.release.812063719/ExtRAMSize=0
 avrtarget/de.innot.avreclipse.configuration.app.release.812063719/ExtendedRAM=false
 avrtarget/de.innot.avreclipse.configuration.app.release.812063719/MCUType=atmega328p
