@@ -5,6 +5,8 @@
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, version 2.
  *
+ * Firmware for USBTherm, a simple AVR micro controller based USB thermometer.
+ *
  * Created on: 26.05.2016
  *     Author: dode@luniks.net
  *
