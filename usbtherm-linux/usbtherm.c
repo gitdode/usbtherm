@@ -125,22 +125,27 @@ static int device_release(struct inode *inode, struct file *filp)
 /**
  * Called when a process reads from the device file, i.e. "cat /dev/usbtherm0".
  */
-static ssize_t device_read(struct file *filp, char *buffer,	size_t length,
+static ssize_t device_read(struct file *filp, char *buffer, size_t length,
 		loff_t *offset)
 {
 	int err = 0;
-	size_t len_rem = 0;
+	size_t msg_len = 0;
 	size_t len_read = 0;
 
 	/* printk(KERN_DEBUG "usbtherm: Reading from device\n"); */
 
-	len_rem = strlen(message) - *offset;
-	if (len_rem <= *offset)
+	msg_len = strlen(message);
+
+	if (*offset >= msg_len)
 	{
 		return 0;
 	}
 
-	len_read = len_rem > length ? length : len_rem;
+	len_read = msg_len - *offset;
+	if (len_read > length)
+	{
+		len_read = length;
+	}
 
 	err = copy_to_user(buffer, message + *offset, len_read);
 	if (err)
