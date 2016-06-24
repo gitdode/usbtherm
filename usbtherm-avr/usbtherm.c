@@ -168,7 +168,8 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
 
 	/*
 	 * The only implemented request - tells the driver to read data
-	 * (the temperature value) with usbFunctionRead()
+	 * (the temperature value) with usbFunctionRead().
+	 * Also, USB_CFG_IMPLEMENT_FN_READ must be set to 1 in usbdrv/usbconfig.h.
 	 */
 	if (req->bRequest == CUSTOM_REQ_TEMP) {
 		return USB_NO_MSG;
