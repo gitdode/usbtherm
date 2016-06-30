@@ -22,8 +22,6 @@
 #include <avr/wdt.h>
 #include <util/delay.h>
 
-#include <avr/pgmspace.h>
-
 #include "usbdrv/usbdrv.h"
 /* #include "usbdrv/oddebug.h" */
 
