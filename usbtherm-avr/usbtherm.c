@@ -155,7 +155,7 @@ uchar usbFunctionRead(uchar *data, uchar len) {
 	int16_t tempx10 = (mVAvg >> EWMA_BS) - TMP36_MV_0C;
 	snprintf((char *)data, len, "%d", tempx10);
 
-    return len;
+	return len;
 }
 
 /**
