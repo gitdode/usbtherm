@@ -1,5 +1,6 @@
 # Simple makefile to build and install the "usbtherm" module.
 
+ccflags-y += -Wall
 obj-m += usbtherm.o
 
 all:
