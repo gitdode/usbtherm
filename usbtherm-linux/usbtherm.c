@@ -63,7 +63,9 @@ static int device_open(struct inode *inode, struct file *filp)
 	int minor = 0;
 	struct usb_interface *interface = NULL;
 	struct usbtherm *dev = NULL;
-	char data[8];
+	char *urb_transfer_buffer;
+
+	urb_transfer_buffer = kzalloc(8, GFP_KERNEL);
 
 	minor = iminor(inode);
 
@@ -95,7 +97,7 @@ static int device_open(struct inode *inode, struct file *filp)
 	err = usb_control_msg(dev->usbdev,
 			usb_rcvctrlpipe(dev->usbdev, USB_DIR_OUT),
 			CUSTOM_REQ_TEMP, USB_DIR_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
-			0, 0, data, sizeof(data), 1000);
+			0, 0, urb_transfer_buffer, sizeof(urb_transfer_buffer), 1000);
 
 	if (err < 0)
 	{
@@ -103,7 +105,9 @@ static int device_open(struct inode *inode, struct file *filp)
 		goto error;
 	}
 
-	snprintf(message, MSG_LEN, "%s\n", data);
+	snprintf(message, MSG_LEN, "%s\n", urb_transfer_buffer);
+
+	kfree(urb_transfer_buffer);
 
 	/* printk(KERN_DEBUG "usbtherm: Device was opened"); */
 
