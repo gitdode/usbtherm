@@ -80,7 +80,7 @@ public class USBTherm {
 		frame.setVisible(true);
 		
 		executor.scheduleAtFixedRate(
-				() -> (new TempWorker(tempReader, tempLabel).execute()), 
+				() -> new TempWorker(tempReader, tempLabel).execute(), 
 				0, UPDATE_SECS, TimeUnit.SECONDS);
 	}
 	
