@@ -10,4 +10,4 @@ This repository contains four projects:
 * usbtherm-linux - Basic but complete Linux kernel USB character device driver module
 * usbtherm-ui - Simple Java desktop application displaying the temperature
 
-A detailed description of the project can be found <a href="http://luniks.net/usbtherm.php">here</a>.
+A detailed description of the project can be found <a href="http://luniks.net/usbtherm.jsp">here</a>.
