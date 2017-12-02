@@ -21,7 +21,7 @@
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/usb.h>
-#include <asm/uaccess.h>
+#include <linux/uaccess.h>
 
 #define DRV_NAME			"usbtherm"
 #define SUCCESS				0
