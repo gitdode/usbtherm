@@ -100,7 +100,7 @@ static int device_open(struct inode *inode, struct file *filp)
 			CUSTOM_REQ_TEMP, USB_DIR_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
 			0, 0, urb_transfer_buffer, sizeof(urb_transfer_buffer), 1000);
 
-	strncpy(data, urb_transfer_buffer, sizeof(data));
+	strlcpy(data, urb_transfer_buffer, sizeof(data));
 	kfree(urb_transfer_buffer);
 
 	if (err < 0)
