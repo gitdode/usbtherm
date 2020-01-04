@@ -47,6 +47,7 @@ int main(int argc, char *argv[]) {
 	// should have transferred at least 1 byte (0°C)
 	if (status < 1) {
 		libusb_close(device);
+		printf("Data transfer from USBTherm device failed\n");
 		goto error;
 	}
 
