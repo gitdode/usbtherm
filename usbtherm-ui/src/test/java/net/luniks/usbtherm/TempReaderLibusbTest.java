@@ -1,3 +1,9 @@
+/**
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, version 2.
+ */
+
 package net.luniks.usbtherm;
 
 import java.io.IOException;
@@ -8,9 +14,11 @@ import org.junit.Test;
 public class TempReaderLibusbTest {
 
 	/**
-	 * Fails if:<br>
-	 * - libusb interface not found in PATH
-	 * - device not connected
+	 * Fails if:
+	 * <ul>
+	 *   <li>libusb interface not found in PATH</li>
+	 *   <li>device not connected</li>
+	 * </ul>
 	 * 
 	 * @throws IOException
 	 */
