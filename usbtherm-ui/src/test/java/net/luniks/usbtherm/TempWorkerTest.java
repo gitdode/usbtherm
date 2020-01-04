@@ -20,7 +20,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class TempWorkerTest {
 
 	@Mock
-	private TempReader reader;
+	private TempReaderDeviceFile reader;
 	
 	@Mock
 	private JLabel label;

@@ -16,7 +16,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public class TempReaderTest {
+public class TempReaderDeviceFileTest {
 	
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -25,7 +25,7 @@ public class TempReaderTest {
 	public void testNoSuchDevice() throws IOException {
 		thrown.expect(NoSuchFileException.class);
 		
-		final TempReader reader = new TempReader("/dev/nosuch");
+		final TempReaderDeviceFile reader = new TempReaderDeviceFile("/dev/nosuch");
 		reader.read();
 	}
 	
@@ -33,14 +33,14 @@ public class TempReaderTest {
 	public void testAccessDenied() throws IOException {
 		thrown.expect(AccessDeniedException.class);
 		
-		final TempReader reader = new TempReader("/dev/mem");
+		final TempReaderDeviceFile reader = new TempReaderDeviceFile("/dev/mem");
 		reader.read();
 	}
 	
 	@Test
 	public void testRead() throws IOException {	
 		final File file = new File("src/test/resources/file");
-		final TempReader reader = new TempReader(file.getAbsolutePath());
+		final TempReaderDeviceFile reader = new TempReaderDeviceFile(file.getAbsolutePath());
 		final String read = reader.read();
 		
 		Assert.assertEquals("content", read);

@@ -17,36 +17,46 @@ import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
 /**
- * Simple UI for USBTherm a simple AVR micro controller based USB thermometer, 
- * displaying and updating the temperature
- * at a certain interval.
+ * Simple UI for USBTherm, a simple AVR micro controller based USB thermometer, 
+ * displaying and updating the temperature at a certain interval.
  * 
  * @author dode@luniks.net
  *
  */
 public class USBTherm {
 	
-	static final String DEVICE = 		"/dev/usbtherm0";
-	static final int 	UPDATE_SECS = 	1;
-	static final String	TEMP_FORMAT = 	"%3.1f °C";
-	static final String	ERROR_MSG = 	"Huh?";
+	static final String DEVICE = "/dev/usbtherm0";
+	static final int UPDATE_SECS = 1;
+	static final String	TEMP_FORMAT = "%3.1f °C";
+	static final String	ERROR_MSG = "---.- °C";
 	
 	private final JLabel tempLabel = new JLabel();
 	private final ScheduledExecutorService executor = 
 			Executors.newScheduledThreadPool(1);
 	
-	private TempReader tempReader;
+	private final TempReader tempReader;
 	
 	/**
-	 * Initializes the reader with the device given as first argument, 
-	 * default is "/dev/usbtherm0" if no argument is given.
+	 * Initializes the reader with the optional access method 
+	 * (DEVICEFILE or LIBUSB (default)) given as first argument and the 
+	 * optional device file given as second argument (only relevant for 
+	 * access method DEVICEFILE, default is "/dev/usbtherm0").
 	 */
 	public USBTherm(final String[] args) {
+		AccessMethod accessMethod = AccessMethod.LIBUSB; 
 		String device = DEVICE;
 		if (args.length > 0) {
-			device = args[0];
+			accessMethod = AccessMethod.valueOf(args[0]);
 		}
-		tempReader = new TempReader(device);
+		if (args.length > 1) {
+			device = args[1];
+		}
+		
+		if (accessMethod == AccessMethod.DEVICEFILE) {
+			tempReader = new TempReaderDeviceFile(device);
+		} else {
+			tempReader = new TempReaderLibusb();
+		}
 	}
 
 	/**
