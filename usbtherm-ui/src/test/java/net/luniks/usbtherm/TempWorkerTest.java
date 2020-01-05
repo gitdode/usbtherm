@@ -32,7 +32,7 @@ public class TempWorkerTest {
 		final TempWorker worker = new TempWorker(reader, label);
 		worker.execute();
 		
-		Mockito.verify(label, Mockito.timeout(1000)).setText("Huh?");
+		Mockito.verify(label, Mockito.timeout(1000)).setText("---.- °C");
 		Mockito.verify(reader).read();
 	}
 	
