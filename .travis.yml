@@ -1,0 +1,4 @@
+before_install:
+  - cd usbtherm-ui
+
+language: java
