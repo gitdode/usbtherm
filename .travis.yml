@@ -9,7 +9,7 @@ jobs:
         - cd usbtherm-linux
       install:
         - sudo apt-get update -qq
-        - sudo apt-get install -y linux-headers-generic
+        - sudo apt-get install -y linux-headers-$(uname -r)
         - sudo ln -s /usr/src/$(uname -r) /lib/modules/$(uname -r)/build
     
       script:
