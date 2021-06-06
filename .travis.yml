@@ -10,6 +10,7 @@ jobs:
       install:
         - sudo apt-get update -qq
         - sudo apt-get install -y linux-headers-generic
+        - sudo ln -s /usr/src/$(uname -r) /lib/modules/$(uname -r)/build
     
       script:
         - make
