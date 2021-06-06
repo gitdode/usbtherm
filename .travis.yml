@@ -1,4 +1,6 @@
-before_install:
-  - cd usbtherm-ui
+jobs:
+  include:
+    - language: java
+      before_script:
+        - cd usbtherm-ui
 
-language: java
