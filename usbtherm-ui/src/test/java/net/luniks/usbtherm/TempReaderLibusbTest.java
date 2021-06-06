@@ -9,6 +9,7 @@ package net.luniks.usbtherm;
 import java.io.IOException;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class TempReaderLibusbTest {
@@ -22,6 +23,7 @@ public class TempReaderLibusbTest {
 	 * 
 	 * @throws IOException
 	 */
+        @Ignore 
 	@Test
 	public void testRead() throws IOException {
 		final TempReaderLibusb reader = new TempReaderLibusb();
