@@ -3,4 +3,8 @@ jobs:
     - language: java
       before_script:
         - cd usbtherm-ui
+        
+    - language: c
+      before_script:
+        - cd usbtherm-linux
 
