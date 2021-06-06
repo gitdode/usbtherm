@@ -7,4 +7,6 @@ jobs:
     - language: c
       before_script:
         - cd usbtherm-linux
+      script:
+        - make
 
