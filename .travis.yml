@@ -7,6 +7,10 @@ jobs:
     - language: c
       before_script:
         - cd usbtherm-linux
+      install:
+        - sudo apt-get update -qq
+        - sudo apt-get install -y linux-headers-generic
+    
       script:
         - make
 
