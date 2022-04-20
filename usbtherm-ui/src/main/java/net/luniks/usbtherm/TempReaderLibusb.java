@@ -38,13 +38,13 @@ public class TempReaderLibusb implements TempReader {
 		final ProcessBuilder builder = new ProcessBuilder(EXECUTABLE);
 		builder.redirectErrorStream(true);
 		final Process process = builder.start();
-		final Future<String> output = executor
-				.submit(new StreamGobbler(process.getInputStream()));
+		final Future<String> output = executor.submit(new StreamGobbler(process.getInputStream()));
 		try {
 			final boolean completed = process.waitFor(500, TimeUnit.MILLISECONDS);
 			if (! completed) {
 				throw new IOException("Timeout (500 ms) reading temperature value");
 			}
+                        
 			final int exit = process.exitValue();
 			if (exit != 0) {
 				final String message = String.format("Failed reading temperature value: %s", output.get());
@@ -52,6 +52,7 @@ public class TempReaderLibusb implements TempReader {
 			}
 			
 			return output.get();
+                        
 		} catch (final InterruptedException | ExecutionException e) {
 			throw new IOException(e.getMessage());
 		}
