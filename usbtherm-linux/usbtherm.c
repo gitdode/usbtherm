@@ -12,9 +12,9 @@
  * thermometer.
  *
  * Learned from and thanks to:
- *	   - http://tldp.org/LDP/lkmpg/2.6/html/lkmpg.html
- *	   - drivers/usb/misc/usbled.c
- *	   - https://github.com/mavam/ml-driver/blob/master/ml_driver.c
+ *       - http://tldp.org/LDP/lkmpg/2.6/html/lkmpg.html
+ *       - drivers/usb/misc/usbled.c
+ *       - https://github.com/mavam/ml-driver/blob/master/ml_driver.c
  */
 
 #include <linux/kernel.h>
@@ -23,13 +23,13 @@
 #include <linux/usb.h>
 #include <linux/uaccess.h>
 
-#define DRV_NAME			"usbtherm"
-#define SUCCESS				0
-#define MSG_LEN				80
-#define CUSTOM_REQ_TEMP		0
+#define DRV_NAME            "usbtherm"
+#define SUCCESS             0
+#define MSG_LEN             64
+#define CUSTOM_REQ_TEMP     0
 
 enum usbtherm_type {
-	DODES_USB_THERMOMETER
+    DODES_USB_THERMOMETER
 };
 
 /**
@@ -38,16 +38,16 @@ enum usbtherm_type {
  * is connected.
  */
 static const struct usb_device_id usbtherm_usb_tbl[] = {
-	/* Custom USBTherm device */
-	{USB_DEVICE(0xd0de, 0x0001), .driver_info = DODES_USB_THERMOMETER},
-	{} /* terminator */
+    /* Custom USBTherm device */
+    {USB_DEVICE(0xd0de, 0x0001), .driver_info = DODES_USB_THERMOMETER},
+    {} /* terminator */
 };
 
 MODULE_DEVICE_TABLE(usb, usbtherm_usb_tbl);
 
 struct usbtherm {
-	struct usb_device *usbdev;
-	enum usbtherm_type type;
+    struct usb_device *usbdev;
+    enum usbtherm_type type;
 };
 
 static struct usb_driver usbtherm_driver;
@@ -59,64 +59,64 @@ static char message[MSG_LEN];
  */
 static int device_open(struct inode *inode, struct file *filp)
 {
-	int err = 0;
-	int minor = 0;
-	struct usb_interface *interface = NULL;
-	struct usbtherm *dev = NULL;
-	char data[8];
-	char *urb_transfer_buffer;
+    int err = 0;
+    int minor = 0;
+    struct usb_interface *interface = NULL;
+    struct usbtherm *dev = NULL;
+    char data[16];
+    char *urb_transfer_buffer;
 
-	urb_transfer_buffer = kzalloc(sizeof(data), GFP_KERNEL);
+    urb_transfer_buffer = kzalloc(sizeof(data), GFP_KERNEL);
 
-	minor = iminor(inode);
+    minor = iminor(inode);
 
-	interface = usb_find_interface(&usbtherm_driver, minor);
-	if (! interface)
-	{
-		err = -ENODEV;
-		printk(KERN_WARNING "usbtherm: Could not find USB interface!\n");
-		goto error;
-	}
+    interface = usb_find_interface(&usbtherm_driver, minor);
+    if (! interface)
+    {
+        err = -ENODEV;
+        printk(KERN_WARNING "usbtherm: Could not find USB interface!\n");
+        goto error;
+    }
 
-	dev = usb_get_intfdata(interface);
-	if (! dev)
-	{
-		err = -ENODEV;
-		printk(KERN_WARNING "usbtherm: Could not get USB device!\n");
-		goto error;
-	}
+    dev = usb_get_intfdata(interface);
+    if (! dev)
+    {
+        err = -ENODEV;
+        printk(KERN_WARNING "usbtherm: Could not get USB device!\n");
+        goto error;
+    }
 
-	/*
-	 * If dev is needed in for example device_read.
-	 */
-	/* filp->private_data = dev; */
+    /*
+     * If dev is needed in for example device_read.
+     */
+    /* filp->private_data = dev; */
 
-	/*
-	 * Send a custom "vendor" type status request to read
-	 * the temperature value from the device.
-	 */
-	err = usb_control_msg(dev->usbdev,
-			usb_rcvctrlpipe(dev->usbdev, USB_DIR_OUT),
-			CUSTOM_REQ_TEMP, USB_DIR_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
-			0, 0, urb_transfer_buffer, sizeof(urb_transfer_buffer), 1000);
+    /*
+     * Send a custom "vendor" type status request to read
+     * the temperature value from the device.
+     */
+    err = usb_control_msg(dev->usbdev,
+            usb_rcvctrlpipe(dev->usbdev, USB_DIR_OUT),
+            CUSTOM_REQ_TEMP, USB_DIR_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+            0, 0, urb_transfer_buffer, sizeof(data), 1000);
 
-	strlcpy(data, urb_transfer_buffer, sizeof(data));
-	kfree(urb_transfer_buffer);
+    strlcpy(data, urb_transfer_buffer, sizeof(data));
+    kfree(urb_transfer_buffer);
 
-	if (err < 0)
-	{
-		err = -EIO;
-		goto error;
-	}
+    if (err < 0)
+    {
+        err = -EIO;
+        goto error;
+    }
 
-	snprintf(message, MSG_LEN, "%s\n", data);
+    snprintf(message, MSG_LEN, "%s\n", data);
 
-	/* printk(KERN_DEBUG "usbtherm: Device was opened"); */
+    /* printk(KERN_DEBUG "usbtherm: Device was opened"); */
 
-	return SUCCESS;
+    return SUCCESS;
 
 error:
-	return err;
+    return err;
 }
 
 /**
@@ -124,49 +124,49 @@ error:
  */
 static int device_release(struct inode *inode, struct file *filp)
 {
-	/* printk(KERN_DEBUG "usbtherm: Device was released\n"); */
+    /* printk(KERN_DEBUG "usbtherm: Device was released\n"); */
 
-	return SUCCESS;
+    return SUCCESS;
 }
 
 /**
  * Called when a process reads from the device file, i.e. "cat /dev/usbtherm0".
  */
 static ssize_t device_read(struct file *filp, char *buffer, size_t length,
-		loff_t *offset)
+        loff_t *offset)
 {
-	int err = 0;
-	size_t msg_len = 0;
-	size_t len_read = 0;
+    int err = 0;
+    size_t msg_len = 0;
+    size_t len_read = 0;
 
-	/* printk(KERN_DEBUG "usbtherm: Reading from device\n"); */
+    /* printk(KERN_DEBUG "usbtherm: Reading from device\n"); */
 
-	msg_len = strlen(message);
+    msg_len = strlen(message);
 
-	if (*offset >= msg_len)
-	{
-		return 0;
-	}
+    if (*offset >= msg_len)
+    {
+        return 0;
+    }
 
-	len_read = msg_len - *offset;
-	if (len_read > length)
-	{
-		len_read = length;
-	}
+    len_read = msg_len - *offset;
+    if (len_read > length)
+    {
+        len_read = length;
+    }
 
-	err = copy_to_user(buffer, message + *offset, len_read);
-	if (err)
-	{
-		err = -EFAULT;
-		goto error;
-	}
+    err = copy_to_user(buffer, message + *offset, len_read);
+    if (err)
+    {
+        err = -EFAULT;
+        goto error;
+    }
 
-	*offset += len_read;
+    *offset += len_read;
 
-	return len_read;
+    return len_read;
 
 error:
-	return err;
+    return err;
 }
 
 /**
@@ -174,19 +174,19 @@ error:
  * echo "hello" > /dev/usbtherm0
  */
 static ssize_t device_write(struct file *filp, const char *buff, size_t len,
-		loff_t *offset)
+        loff_t *offset)
 {
-	printk(KERN_WARNING "usbtherm: Writing to USBTherm is not supported!\n");
+    printk(KERN_WARNING "usbtherm: Writing to USBTherm is not supported!\n");
 
-	return -EINVAL;
+    return -EINVAL;
 }
 
 static struct file_operations fops = {
-	.owner =	THIS_MODULE,
-	.read = 	device_read,
-	.write = 	device_write,
-	.open = 	device_open,
-	.release = 	device_release
+    .owner =    THIS_MODULE,
+    .read =     device_read,
+    .write =     device_write,
+    .open =     device_open,
+    .release =     device_release
 };
 
 /**
@@ -194,59 +194,59 @@ static struct file_operations fops = {
  */
 static char *usbtherm_devnode(struct device *dev, umode_t *mode)
 {
-	if (! mode)
-	{
-		return NULL;
-	}
-	*mode = 0666;
+    if (! mode)
+    {
+        return NULL;
+    }
+    *mode = 0666;
 
-	return NULL;
+    return NULL;
 }
 
 static struct usb_class_driver usbtherm_class = {
-	.name = DRV_NAME "%d",
-	.devnode = usbtherm_devnode,
-	.fops = &fops,
-	.minor_base = 0
+    .name = DRV_NAME "%d",
+    .devnode = usbtherm_devnode,
+    .fops = &fops,
+    .minor_base = 0
 };
 
 /**
  * Called when the USB device was connected.
  */
 static int usbtherm_probe(struct usb_interface *interface,
-		const struct usb_device_id *id)
+        const struct usb_device_id *id)
 {
-	int err = 0;
-	struct usb_device *usbdev = interface_to_usbdev(interface);
-	struct usbtherm *dev = NULL;
+    int err = 0;
+    struct usb_device *usbdev = interface_to_usbdev(interface);
+    struct usbtherm *dev = NULL;
 
-	dev = kzalloc(sizeof(struct usbtherm), GFP_KERNEL);
-	if (dev == NULL)
-	{
-		err = -ENOMEM;
-		goto error;
-	}
+    dev = kzalloc(sizeof(struct usbtherm), GFP_KERNEL);
+    if (dev == NULL)
+    {
+        err = -ENOMEM;
+        goto error;
+    }
 
-	dev->usbdev = usb_get_dev(usbdev);
-	dev->type = id->driver_info;
+    dev->usbdev = usb_get_dev(usbdev);
+    dev->type = id->driver_info;
 
-	usb_set_intfdata(interface, dev);
+    usb_set_intfdata(interface, dev);
 
-	/*
-	 * Creates the device file in /dev and the class in /sys/class/usbmisc
-	 */
-	err = usb_register_dev(interface, &usbtherm_class);
-	if (err != 0)
-	{
-		printk(KERN_WARNING "usbtherm: Could not register USB device!\n");
-	}
+    /*
+     * Creates the device file in /dev and the class in /sys/class/usbmisc
+     */
+    err = usb_register_dev(interface, &usbtherm_class);
+    if (err != 0)
+    {
+        printk(KERN_WARNING "usbtherm: Could not register USB device!\n");
+    }
 
-	printk(KERN_INFO "usbtherm: USB device was connected\n");
+    printk(KERN_INFO "usbtherm: USB device was connected\n");
 
-	return SUCCESS;
+    return SUCCESS;
 
 error:
-	return err;
+    return err;
 }
 
 /**
@@ -254,31 +254,31 @@ error:
  */
 static void usbtherm_disconnect(struct usb_interface *interface)
 {
-	struct usbtherm *dev;
+    struct usbtherm *dev;
 
-	dev = usb_get_intfdata(interface);
+    dev = usb_get_intfdata(interface);
 
-	usb_set_intfdata(interface, NULL);
-	usb_put_dev(dev->usbdev);
+    usb_set_intfdata(interface, NULL);
+    usb_put_dev(dev->usbdev);
 
-	/*
-	 * Cleans up the device file in /dev and the class in /sys/class/usbmisc
-	 */
-	usb_deregister_dev(interface, &usbtherm_class);
+    /*
+     * Cleans up the device file in /dev and the class in /sys/class/usbmisc
+     */
+    usb_deregister_dev(interface, &usbtherm_class);
 
-	kfree(dev);
+    kfree(dev);
 
-	printk(KERN_INFO "usbtherm: USB device was disconnected\n");
+    printk(KERN_INFO "usbtherm: USB device was disconnected\n");
 }
 
 /**
  * Initialize the usb_driver structure.
  */
 static struct usb_driver usbtherm_driver = {
-    .name = 		DRV_NAME,
-    .id_table =		usbtherm_usb_tbl,
-    .probe = 		usbtherm_probe,
-    .disconnect = 	usbtherm_disconnect,
+    .name =         DRV_NAME,
+    .id_table =        usbtherm_usb_tbl,
+    .probe =         usbtherm_probe,
+    .disconnect =     usbtherm_disconnect,
 };
 
 /**

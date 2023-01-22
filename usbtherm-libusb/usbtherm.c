@@ -19,46 +19,46 @@
 #include <stdlib.h>
 #include <libusb-1.0/libusb.h>
 
-#define ID_VENDOR		0xd0de
-#define ID_PRODUCT		0x0001
-#define CUSTOM_REQ_TEMP	0
+#define ID_VENDOR           0xd0de
+#define ID_PRODUCT          0x0001
+#define CUSTOM_REQ_TEMP     0
 
 int main(int argc, char *argv[]) {
-	libusb_device_handle *device;
-	int status;
-	unsigned char data[8];
+    libusb_device_handle *device;
+    int status;
+    unsigned char data[16];
 
-	status = libusb_init(NULL);
-	if (status < 0) {
-		printf("Initialization failed: %s\n", libusb_error_name(status));
+    status = libusb_init(NULL);
+    if (status < 0) {
+        printf("Initialization failed: %s\n", libusb_error_name(status));
 
-		return status;
-	}
+        return status;
+    }
 
-	device = libusb_open_device_with_vid_pid(NULL, ID_VENDOR, ID_PRODUCT);
-	if (device == 0) {
-		printf("Failed to open USBTherm device\n");
-		goto error;
-	}
+    device = libusb_open_device_with_vid_pid(NULL, ID_VENDOR, ID_PRODUCT);
+    if (device == 0) {
+        printf("Failed to open USBTherm device\n");
+        goto error;
+    }
 
-	status = libusb_control_transfer(device,
-			LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
-			CUSTOM_REQ_TEMP, 0, 0, data, sizeof(data), 1000);
-	// should have transferred at least 1 byte (0°C)
-	if (status < 1) {
-		libusb_close(device);
-		printf("Data transfer from USBTherm device failed\n");
-		goto error;
-	}
+    status = libusb_control_transfer(device,
+            LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE,
+            CUSTOM_REQ_TEMP, 0, 0, data, sizeof(data), 1000);
+    // should have transferred at least 1 byte
+    if (status < 1) {
+        libusb_close(device);
+        printf("Data transfer from USBTherm device failed\n");
+        goto error;
+    }
 
-	printf("%s\n", data);
+    printf("%s\n", data);
 
-	libusb_close(device);
-	libusb_exit(NULL);
+    libusb_close(device);
+    libusb_exit(NULL);
 
-	return 0;
+    return 0;
 
 error:
-	libusb_exit(NULL);
-	return -1;
+    libusb_exit(NULL);
+    return -1;
 }
