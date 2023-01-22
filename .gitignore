@@ -1,3 +1,7 @@
 /usbtherm-libusb/.project
 /usbtherm-libusb/.cproject
 /usbtherm-linux/.settings/
+/usbtherm-linux/.usbtherm.mod.cmd
+/usbtherm-linux/.modules.order.cmd
+/usbtherm-linux/usbtherm.mod
+/usbtherm-linux/.Module.symvers.cmd
