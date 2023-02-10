@@ -1,0 +1,9 @@
+make -C /lib/modules/6.1.0-1-amd64/build M=/home/dode/dev/usbtherm/usbtherm-linux modules
+make[1]: Verzeichnis „/usr/src/linux-headers-6.1.0-1-amd64“ wird betreten
+  CC [M]  /home/dode/dev/usbtherm/usbtherm-linux/usbtherm.o
+  MODPOST /home/dode/dev/usbtherm/usbtherm-linux/Module.symvers
+  CC [M]  /home/dode/dev/usbtherm/usbtherm-linux/usbtherm.mod.o
+  LD [M]  /home/dode/dev/usbtherm/usbtherm-linux/usbtherm.ko
+  BTF [M] /home/dode/dev/usbtherm/usbtherm-linux/usbtherm.ko
+Skipping BTF generation for /home/dode/dev/usbtherm/usbtherm-linux/usbtherm.ko due to unavailability of vmlinux
+make[1]: Verzeichnis „/usr/src/linux-headers-6.1.0-1-amd64“ wird verlassen

@@ -1,0 +1,27 @@
+called: /usr/bin/ld
+	/usr/src/linux-headers-6.1.0-1-amd64
+	ld
+	-m
+	elf_x86_64
+	-z
+	noexecstack
+	--no-warn-rwx-segments
+	-v
+
+called: /usr/bin/ld
+	/usr/src/linux-headers-6.1.0-1-amd64
+	ld
+	-r
+	-m
+	elf_x86_64
+	-z
+	noexecstack
+	--no-warn-rwx-segments
+	--build-id=sha1
+	-T
+	arch/x86/module.lds
+	-o
+	/home/dode/dev/usbtherm/usbtherm-linux/usbtherm.ko
+	/home/dode/dev/usbtherm/usbtherm-linux/usbtherm.o
+	/home/dode/dev/usbtherm/usbtherm-linux/usbtherm.mod.o
+
