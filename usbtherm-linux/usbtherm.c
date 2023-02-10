@@ -66,8 +66,6 @@ static int device_open(struct inode *inode, struct file *filp)
     char data[16];
     char *urb_transfer_buffer;
 
-    urb_transfer_buffer = kzalloc(sizeof(data), GFP_KERNEL);
-
     minor = iminor(inode);
 
     interface = usb_find_interface(&usbtherm_driver, minor);
@@ -95,6 +93,8 @@ static int device_open(struct inode *inode, struct file *filp)
      * Send a custom "vendor" type status request to read
      * the temperature value from the device.
      */
+    urb_transfer_buffer = kzalloc(sizeof(data), GFP_KERNEL);
+    
     err = usb_control_msg(dev->usbdev,
             usb_rcvctrlpipe(dev->usbdev, USB_DIR_OUT),
             CUSTOM_REQ_TEMP, USB_DIR_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
