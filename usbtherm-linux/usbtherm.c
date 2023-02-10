@@ -101,6 +101,7 @@ static int device_open(struct inode *inode, struct file *filp)
             0, 0, urb_transfer_buffer, sizeof(data), 1000);
 
     strlcpy(data, urb_transfer_buffer, sizeof(data));
+    
     kfree(urb_transfer_buffer);
 
     if (err < 0)
@@ -231,7 +232,7 @@ static int usbtherm_probe(struct usb_interface *interface,
     dev->type = id->driver_info;
 
     usb_set_intfdata(interface, dev);
-
+    
     /*
      * Creates the device file in /dev and the class in /sys/class/usbmisc
      */
