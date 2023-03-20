@@ -58,10 +58,10 @@
       <folder path="0">
         <cTool>
           <incDir>
-            <pElem>/usr/src/linux-headers-6.1.0-1-common/include</pElem>
-            <pElem>/usr/src/linux-headers-6.1.0-1-common/arch/x86/include</pElem>
-            <pElem>/usr/src/linux-headers-6.1.0-1-amd64/arch/x86/include/generated</pElem>
-            <pElem>/usr/src/linux-headers-6.1.0-1-amd64/include</pElem>
+            <pElem>/usr/src/linux-headers-common/include</pElem>
+            <pElem>/usr/src/linux-headers-common/arch/x86/include</pElem>
+            <pElem>/usr/src/linux-headers-amd64/arch/x86/include/generated</pElem>
+            <pElem>/usr/src/linux-headers-amd64/include</pElem>
           </incDir>
           <preprocessorList>
             <Elem>__KERNEL__</Elem>
