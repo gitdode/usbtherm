@@ -5,3 +5,4 @@
 /usbtherm-linux/.modules.order.cmd
 /usbtherm-linux/usbtherm.mod
 /usbtherm-linux/.Module.symvers.cmd
+/usbtherm-ui/target/

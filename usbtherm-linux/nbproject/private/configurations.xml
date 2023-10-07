@@ -2,8 +2,6 @@
 <configurationDescriptor version="100">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="/home/dode/dev/usbtherm/usbtherm-linux" name="0">
-      <df name=".settings">
-      </df>
       <in>usbtherm.c</in>
       <in>usbtherm.mod</in>
       <in>usbtherm.mod.c</in>

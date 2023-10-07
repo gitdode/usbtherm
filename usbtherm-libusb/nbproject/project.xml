@@ -4,18 +4,20 @@
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
             <name>usbtherm-libusb</name>
-            <c-extensions/>
+            <c-extensions>c</c-extensions>
             <cpp-extensions/>
             <header-extensions/>
+            <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
-            <sourceRootList/>
+            <sourceRootList>
+                <sourceRootElem>/home/dode/dev/usbtherm/usbtherm-libusb</sourceRootElem>
+            </sourceRootList>
             <confList>
                 <confElem>
                     <name>Default</name>
                     <type>0</type>
                 </confElem>
             </confList>
-            <sourceEncoding>UTF-8</sourceEncoding>
             <formatting>
                 <project-formatting-style>false</project-formatting-style>
             </formatting>
