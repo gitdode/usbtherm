@@ -9,4 +9,4 @@ This repository contains four projects:
 * usbtherm-libusb - Minimal interface to the device using libusb (much simpler and portable alternative to the Linux driver)
 * usbtherm-ui - Simple Java desktop application displaying the temperature
 
-A detailed description of the project can be found http://luniks.net/usbtherm.jsp
+A detailed description of the project can be found at http://luniks.net/usbtherm.jsp
