@@ -100,7 +100,7 @@ static int device_open(struct inode *inode, struct file *filp)
             CUSTOM_REQ_TEMP, USB_DIR_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
             0, 0, urb_transfer_buffer, sizeof(data), 1000);
 
-    strlcpy(data, urb_transfer_buffer, sizeof(data));
+    strscpy(data, urb_transfer_buffer, sizeof(data));
     
     kfree(urb_transfer_buffer);
 
@@ -193,7 +193,7 @@ static struct file_operations fops = {
 /**
  * Have the device file created with read and write permission for everyone.
  */
-static char *usbtherm_devnode(struct device *dev, umode_t *mode)
+static char *usbtherm_devnode(const struct device *dev, umode_t *mode)
 {
     if (! mode)
     {
