@@ -6,6 +6,7 @@
 /usbtherm.mod.o
 /usbtherm.o
 /.tmp_versions/
+/.module-common.o
 /.usbtherm.ko.cmd
 /.usbtherm.mod.o.cmd
 /.usbtherm.o.cmd
