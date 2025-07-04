@@ -34,6 +34,11 @@
           <buildCommand>${MAKE} -f Makefile</buildCommand>
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
           <executablePath></executablePath>
+          <cTool>
+            <incDir>
+              <pElem>/usr/src/linux-headers-6.16.0-rc4/include</pElem>
+            </incDir>
+          </cTool>
         </makeTool>
         <preBuild>
           <preBuildCommandWorkingDir>.</preBuildCommandWorkingDir>

@@ -6,3 +6,4 @@
 /usbtherm-linux/usbtherm.mod
 /usbtherm-linux/.Module.symvers.cmd
 /usbtherm-ui/target/
+/usbtherm-linux/..module-common.o.cmd
